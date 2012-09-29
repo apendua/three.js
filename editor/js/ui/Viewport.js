@@ -32,10 +32,16 @@ var Viewport = function ( signals ) {
 	sceneHelpers.add( grid );
 
 	var selectionBox = new THREE.Mesh( new THREE.CubeGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: true } ) );
-	selectionBox.geometry.dynamic = true;
 	selectionBox.matrixAutoUpdate = false;
 	selectionBox.visible = false;
 	sceneHelpers.add( selectionBox );
+
+	var selectionAxis = new THREE.AxisHelper( 100 );
+	selectionAxis.material.depthTest = false;
+	selectionAxis.material.transparent = true;
+	selectionAxis.matrixAutoUpdate = false;
+	selectionAxis.visible = false;
+	sceneHelpers.add( selectionAxis );
 
 	//
 
@@ -55,11 +61,6 @@ var Viewport = function ( signals ) {
 	controls.staticMoving = true;
 	controls.dynamicDampingFactor = 0.3;
 	controls.addEventListener( 'change', render );
-
-	/*
-	var controls = new THREE.OrbitControls( camera, container.dom );
-	controls.addEventListener( 'change', render );
-	*/
 
 	var light = new THREE.DirectionalLight( 0xffffff );
 	light.position.set( 1, 0.5, 0 ).normalize();
@@ -107,13 +108,11 @@ var Viewport = function ( signals ) {
 
 	signals.objectAdded.add( function ( object ) {
 
-		THREE.SceneUtils.traverseHierarchy( object, function ( child ) {
+		object.traverse( function ( child ) {
 
 			objects.push( child );
 
 		} );
-
-		objects.push( object );
 
 		scene.add( object );
 		render();
@@ -133,6 +132,7 @@ var Viewport = function ( signals ) {
 	signals.objectSelected.add( function ( object ) {
 
 		selectionBox.visible = false;
+		selectionAxis.visible = false;
 
 		if ( object !== null && object.geometry ) {
 
@@ -181,8 +181,10 @@ var Viewport = function ( signals ) {
 			selectionBox.geometry.verticesNeedUpdate = true;
 
 			selectionBox.matrixWorld = object.matrixWorld;
+			selectionAxis.matrixWorld = object.matrixWorld;
 
 			selectionBox.visible = true;
+			selectionAxis.visible = true;
 
 		}
 
@@ -231,8 +233,8 @@ var Viewport = function ( signals ) {
 		scene.updateMatrixWorld();
 
 		renderer.clear();
-		renderer.render( sceneHelpers, camera );
 		renderer.render( scene, camera );
+		renderer.render( sceneHelpers, camera );
 
 	}
 
