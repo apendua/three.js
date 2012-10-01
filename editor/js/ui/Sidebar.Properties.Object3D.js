@@ -20,7 +20,7 @@ Sidebar.Properties.Object3D = function ( signals ) {
 	// name
 
 	var objectNameRow = new UI.Panel();
-	var objectName = new UI.Text( 'absolute' ).setLeft( '90px' ).setColor( '#444' );
+	var objectName = new UI.Text( 'absolute' ).setLeft( '100px' ).setColor( '#444' );
 
 	objectNameRow.add( new UI.Text().setValue( 'Name' ).setColor( '#666' ) );
 	objectNameRow.add( objectName );
@@ -30,9 +30,9 @@ Sidebar.Properties.Object3D = function ( signals ) {
 	// position
 
 	var objectPositionRow = new UI.Panel();
-	var objectPositionX = new UI.Number( 'absolute' ).setLeft( '90px' ).setWidth( '50px' ).onChange( update );
-	var objectPositionY = new UI.Number( 'absolute' ).setLeft( '150px' ).setWidth( '50px' ).onChange( update );
-	var objectPositionZ = new UI.Number( 'absolute' ).setLeft( '210px' ).setWidth( '50px' ).onChange( update );
+	var objectPositionX = new UI.Number( 'absolute' ).setLeft( '100px' ).setWidth( '50px' ).onChange( update );
+	var objectPositionY = new UI.Number( 'absolute' ).setLeft( '160px' ).setWidth( '50px' ).onChange( update );
+	var objectPositionZ = new UI.Number( 'absolute' ).setLeft( '220px' ).setWidth( '50px' ).onChange( update );
 
 	objectPositionRow.add( new UI.Text().setValue( 'Position' ).setColor( '#666' ) );
 	objectPositionRow.add( objectPositionX, objectPositionY, objectPositionZ );
@@ -42,9 +42,9 @@ Sidebar.Properties.Object3D = function ( signals ) {
 	// rotation
 
 	var objectRotationRow = new UI.Panel();
-	var objectRotationX = new UI.Number( 'absolute' ).setLeft( '90px' ).setWidth( '50px' ).onChange( update );
-	var objectRotationY = new UI.Number( 'absolute' ).setLeft( '150px' ).setWidth( '50px' ).onChange( update );
-	var objectRotationZ = new UI.Number( 'absolute' ).setLeft( '210px' ).setWidth( '50px' ).onChange( update );
+	var objectRotationX = new UI.Number( 'absolute' ).setLeft( '100px' ).setWidth( '50px' ).onChange( update );
+	var objectRotationY = new UI.Number( 'absolute' ).setLeft( '160px' ).setWidth( '50px' ).onChange( update );
+	var objectRotationZ = new UI.Number( 'absolute' ).setLeft( '220px' ).setWidth( '50px' ).onChange( update );
 
 	objectRotationRow.add( new UI.Text().setValue( 'Rotation' ).setColor( '#666' ) );
 	objectRotationRow.add( objectRotationX, objectRotationY, objectRotationZ );
@@ -54,9 +54,9 @@ Sidebar.Properties.Object3D = function ( signals ) {
 	// scale
 
 	var objectScaleRow = new UI.Panel();
-	var objectScaleX = new UI.Number( 'absolute' ).setValue( 1 ).setLeft( '90px' ).setWidth( '50px' ).onChange( update );
-	var objectScaleY = new UI.Number( 'absolute' ).setValue( 1 ).setLeft( '150px' ).setWidth( '50px' ).onChange( update );
-	var objectScaleZ = new UI.Number( 'absolute' ).setValue( 1 ).setLeft( '210px' ).setWidth( '50px' ).onChange( update );
+	var objectScaleX = new UI.Number( 'absolute' ).setValue( 1 ).setLeft( '100px' ).setWidth( '50px' ).onChange( update );
+	var objectScaleY = new UI.Number( 'absolute' ).setValue( 1 ).setLeft( '160px' ).setWidth( '50px' ).onChange( update );
+	var objectScaleZ = new UI.Number( 'absolute' ).setValue( 1 ).setLeft( '220px' ).setWidth( '50px' ).onChange( update );
 
 	objectScaleRow.add( new UI.Text().setValue( 'Scale' ).setColor( '#666' ) );
 	objectScaleRow.add( objectScaleX, objectScaleY, objectScaleZ );
@@ -66,12 +66,44 @@ Sidebar.Properties.Object3D = function ( signals ) {
 	// visible
 
 	var objectVisibleRow = new UI.Panel();
-	var objectVisible = new UI.Checkbox( 'absolute' ).setLeft( '90px' ).onChange( update );
+	var objectVisible = new UI.Checkbox( 'absolute' ).setLeft( '100px' ).onChange( update );
 
 	objectVisibleRow.add( new UI.Text().setValue( 'Visible' ).setColor( '#666' ) );
 	objectVisibleRow.add( objectVisible );
 
 	container.add( objectVisibleRow );
+
+
+	// fov
+
+	var objectFovRow = new UI.Panel();
+	var objectFov = new UI.Number( 'absolute' ).setLeft( '100px' ).onChange( update );
+
+	objectFovRow.add( new UI.Text().setValue( 'Fov' ).setColor( '#666' ) );
+	objectFovRow.add( objectFov );
+
+	container.add( objectFovRow );
+
+	// near
+
+	var objectNearRow = new UI.Panel();
+	var objectNear = new UI.Number( 'absolute' ).setLeft( '100px' ).onChange( update );
+
+	objectNearRow.add( new UI.Text().setValue( 'Near' ).setColor( '#666' ) );
+	objectNearRow.add( objectNear );
+
+	container.add( objectNearRow );
+
+	// far
+
+	var objectFarRow = new UI.Panel();
+	var objectFar = new UI.Number( 'absolute' ).setLeft( '100px' ).onChange( update );
+
+	objectFarRow.add( new UI.Text().setValue( 'Far' ).setColor( '#666' ) );
+	objectFarRow.add( objectFar );
+
+	container.add( objectFarRow );
+
 
 	container.add( new UI.Break() );
 
@@ -97,7 +129,41 @@ Sidebar.Properties.Object3D = function ( signals ) {
 
 			selected.visible = objectVisible.getValue();
 
+			if ( selected.fov !== undefined ) {
+
+				selected.fov = objectFov.getValue();
+
+			}
+
+			if ( selected.near !== undefined ) {
+
+				selected.near = objectNear.getValue();
+
+			}
+
+			if ( selected.far !== undefined ) {
+
+				selected.far = objectFar.getValue();
+
+			}
+
 			signals.objectChanged.dispatch( selected );
+
+		}
+
+	}
+
+	function updateRows() {
+
+		var properties = {
+			'fov': objectFovRow,
+			'near': objectNearRow,
+			'far': objectFarRow
+		};
+
+		for ( var property in properties ) {
+
+			properties[ property ].setDisplay( selected[ property ] !== undefined ? '' : 'none' );
 
 		}
 
@@ -139,7 +205,27 @@ Sidebar.Properties.Object3D = function ( signals ) {
 			objectScaleY.setValue( object.scale.y );
 			objectScaleZ.setValue( object.scale.z );
 
+			if ( object.fov !== undefined ) {
+
+				objectFov.setValue( object.fov );
+
+			}
+
+			if ( object.near !== undefined ) {
+
+				objectNear.setValue( object.near );
+
+			}
+
+			if ( object.far !== undefined ) {
+
+				objectFar.setValue( object.far );
+
+			}
+
 			objectVisible.setValue( object.visible );
+
+			updateRows();
 
 		} else {
 
