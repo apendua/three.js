@@ -23,7 +23,9 @@ Sidebar.Properties.Geometry = function ( signals ) {
 	};
 
 	var container = new UI.Panel();
+	container.setBorderTop( '1px solid #ccc' );
 	container.setDisplay( 'none' );
+	container.setPadding( '10px' );
 
 	container.add( new UI.Text().setValue( 'GEOMETRY' ).setColor( '#666' ) );
 	container.add( new UI.Button( 'absolute' ).setRight( '0px' ).setLabel( 'Export' ).onClick( exportGeometry ) );
@@ -32,7 +34,7 @@ Sidebar.Properties.Geometry = function ( signals ) {
 	// name
 
 	var geometryNameRow = new UI.Panel();
-	var geometryName = new UI.Text( 'absolute' ).setLeft( '100px' ).setColor( '#444' ).setFontSize( '12px' );
+	var geometryName = new UI.Input( 'absolute' ).setLeft( '100px' ).setWidth( '150px' ).setColor( '#444' ).setFontSize( '12px' ).onChange( update );
 
 	geometryNameRow.add( new UI.Text().setValue( 'Name' ).setColor( '#666' ) );
 	geometryNameRow.add( geometryName );
@@ -69,11 +71,20 @@ Sidebar.Properties.Geometry = function ( signals ) {
 
 	container.add( geometryFacesRow );
 
-	container.add( new UI.Break() );
 
 	//
 
 	var selected = null;
+
+	function update() {
+
+		if ( selected ) {
+
+			selected.name = geometryName.getValue();
+
+		}
+
+	}
 
 	signals.objectSelected.add( function ( object ) {
 

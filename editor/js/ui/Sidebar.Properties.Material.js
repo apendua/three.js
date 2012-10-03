@@ -18,7 +18,9 @@ Sidebar.Properties.Material = function ( signals ) {
 	};
 
 	var container = new UI.Panel();
+	container.setBorderTop( '1px solid #ccc' );
 	container.setDisplay( 'none' );
+	container.setPadding( '10px' );
 
 	container.add( new UI.Text().setValue( 'MATERIAL' ).setColor( '#666' ) );
 	container.add( new UI.Break(), new UI.Break() );
@@ -26,7 +28,7 @@ Sidebar.Properties.Material = function ( signals ) {
 	// name
 
 	var materialNameRow = new UI.Panel();
-	var materialName = new UI.Text( 'absolute' ).setLeft( '100px' ).setColor( '#444' ).setFontSize( '12px' );
+	var materialName = new UI.Input( 'absolute' ).setLeft( '100px' ).setWidth( '150px' ).setColor( '#444' ).setFontSize( '12px' ).onChange( update );
 
 	materialNameRow.add( new UI.Text().setValue( 'Name' ).setColor( '#666' ) );
 	materialNameRow.add( materialName );
@@ -46,7 +48,7 @@ Sidebar.Properties.Material = function ( signals ) {
 		'MeshNormalMaterial': 'MeshNormalMaterial',
 		'MeshPhongMaterial': 'MeshPhongMaterial'
 
-	} ).setLeft( '100px' ).setWidth( '180px' ).setColor( '#444' ).setFontSize( '12px' ).onChange( update );
+	} ).setLeft( '100px' ).setWidth( '150px' ).setColor( '#444' ).setFontSize( '12px' ).onChange( update );
 
 	materialClassRow.add( new UI.Text().setValue( 'Class' ).setColor( '#666' ) );
 	materialClassRow.add( materialClass );
@@ -208,7 +210,6 @@ Sidebar.Properties.Material = function ( signals ) {
 	container.add( materialWireframeRow );
 
 
-
 	//
 
 	var selected = null;
@@ -218,6 +219,8 @@ Sidebar.Properties.Material = function ( signals ) {
 		var material = selected.material;
 
 		if ( material ) {
+
+			material.name = materialName.getValue();
 
 			if ( material instanceof materials[ materialClass.getValue() ] == false ) {
 
@@ -296,6 +299,7 @@ Sidebar.Properties.Material = function ( signals ) {
 			'emissive': materialEmissiveRow,
 			'specular': materialSpecularRow,
 			'shininess': materialShininessRow,
+			'map': materialMapRow,
 			'lightMap': materialLightMapRow,
 			'bumpMap': materialBumpMapRow,
 			'normalMap': materialNormalMapRow,

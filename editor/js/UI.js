@@ -265,6 +265,57 @@ UI.Text.prototype.setValue = function ( value ) {
 
 };
 
+
+// Input
+
+UI.Input = function ( position ) {
+
+	UI.Element.call( this );
+
+	var scope = this;
+
+	this.dom = document.createElement( 'input' );
+	this.dom.style.position = position || 'relative';
+	this.dom.style.marginTop = '-2px';
+	this.dom.style.marginLeft = '-2px';
+
+	this.onChangeCallback = null;
+
+	this.dom.addEventListener( 'change', function ( event ) {
+
+		if ( scope.onChangeCallback ) scope.onChangeCallback();
+
+	}, false );
+
+	return this;
+
+};
+
+UI.Input.prototype = Object.create( UI.Element.prototype );
+
+UI.Input.prototype.getValue = function () {
+
+	return this.dom.value;
+
+};
+
+UI.Input.prototype.setValue = function ( value ) {
+
+	this.dom.value = value;
+
+	return this;
+
+};
+
+UI.Input.prototype.onChange = function ( callback ) {
+
+	this.onChangeCallback = callback;
+
+	return this;
+
+};
+
+
 // Select
 
 UI.Select = function ( position ) {
@@ -345,6 +396,7 @@ UI.Select.prototype.onChange = function ( callback ) {
 
 };
 
+
 // Checkbox
 
 UI.Checkbox = function ( position ) {
@@ -392,6 +444,7 @@ UI.Checkbox.prototype.onChange = function ( callback ) {
 	return this;
 
 };
+
 
 // Color
 
@@ -455,71 +508,125 @@ UI.Number = function ( position ) {
 
 	var scope = this;
 
-	this.dom = document.createElement( 'input' );
+	this.dom = document.createElement( 'span' );
 	this.dom.style.position = position || 'relative';
-	this.dom.style.marginTop = '0px';
-	this.dom.style.color = '#0080f0';
-	this.dom.style.fontSize = '12px';
-	this.dom.style.backgroundColor = 'transparent';
-	this.dom.style.border = '0px';
-	this.dom.style.cursor = 'col-resize';
 
-	this.dom.value = '0.00';
+	var display = document.createElement( 'span' );
+	display.style.color = '#0080f0';
+	display.style.fontSize = '12px';
+	display.style.cursor = 'col-resize';
+	display.textContent = '0.00';
+	this.dom.appendChild( display );
+
+	var input = document.createElement( 'input' );
+	input.style.display = 'none';
+	input.style.width = '100%';
+	input.style.marginTop = '-2px';
+	input.style.marginLeft = '-2px';
+	input.style.fontSize = '12px';
+	this.dom.appendChild( input );
 
 	this.min = - Infinity;
 	this.max = Infinity;
 
 	this.onChangeCallback = null;
 
-	var onMouseDownValue, onMouseDownScreenX, onMouseDownScreenY;
+	var distance = 0;
+	var onMouseDownValue = 0;
 
 	var onMouseDown = function ( event ) {
 
-		// event.preventDefault();
+		event.preventDefault();
 
-		onMouseDownValue = parseFloat( scope.dom.value );
-		onMouseDownScreenX = event.screenX;
-		onMouseDownScreenY = event.screenY;
+		distance = 0;
+
+		onMouseDownValue = parseFloat( display.textContent );
 
 		document.addEventListener( 'mousemove', onMouseMove, false );
 		document.addEventListener( 'mouseup', onMouseUp, false );
 
-	}
+	};
 
 	var onMouseMove = function ( event ) {
 
-		var distance = ( event.screenX - onMouseDownScreenX ) - ( event.screenY - onMouseDownScreenY );
-		var amount = event.shiftKey ? 10 : 100;
+		var movementX = event.movementX || event.webkitMovementX || event.mozMovementX || 0;
+		var movementY = event.movementY || event.webkitMovementY || event.mozMovementY || 0;
 
-		var number = onMouseDownValue + ( distance / amount );
+		distance += movementX - movementY;
 
-		scope.dom.value = Math.min( scope.max, Math.max( scope.min, number ) ).toFixed( 2 );
+		var number = onMouseDownValue + ( distance / ( event.shiftKey ? 10 : 100 ) );
+
+		display.textContent = Math.min( scope.max, Math.max( scope.min, number ) ).toFixed( 2 );
 
 		if ( scope.onChangeCallback ) scope.onChangeCallback();
 
-	}
+	};
 
 	var onMouseUp = function ( event ) {
 
 		document.removeEventListener( 'mousemove', onMouseMove, false );
 		document.removeEventListener( 'mouseup', onMouseUp, false );
 
-	}
+		if ( Math.abs( distance ) < 1 ) {
 
-	this.dom.addEventListener( 'mousedown', onMouseDown, false );
-	this.dom.addEventListener( 'change', function ( event ) {
+			display.style.display = 'none';
 
-		var number = parseFloat( scope.dom.value );
+			input.value = display.textContent;
 
-		if ( number !== NaN ) {
+			input.addEventListener( 'change', onInputChange, false );
+			input.addEventListener( 'blur', onInputBlur, false );
+			input.addEventListener( 'keyup', onInputKeyUp, false );
 
-			scope.dom.value = number.toFixed( 2 );
+			input.style.display = '';
+
+			input.focus();
+			input.select();
+
+		}
+
+	};
+
+	var onInputChange = function ( event ) {
+
+		var number = parseFloat( input.value );
+
+		if ( isNaN( number ) === false ) {
+
+			display.textContent = number.toFixed( 2 );
 
 			if ( scope.onChangeCallback ) scope.onChangeCallback();
 
 		}
 
-	}, false );
+	};
+
+	var onInputBlur = function ( event ) {
+
+		display.style.display = '';
+
+		input.removeEventListener( 'change', onInputChange );
+		input.removeEventListener( 'blur', onInputBlur );
+		input.removeEventListener( 'keyup', onInputKeyUp );
+		input.style.display = 'none';
+
+	};
+
+	var onInputKeyUp = function ( event ) {
+
+		if ( event.keyCode == 13 ) {
+
+			display.style.display = '';
+
+			input.removeEventListener( 'change', onInputChange );
+			input.removeEventListener( 'blur', onInputBlur );
+			input.removeEventListener( 'keyup', onInputKeyUp );
+			input.style.display = 'none';
+
+		}
+
+	};
+
+	display.addEventListener( 'mousedown', onMouseDown, false );
 
 	return this;
 
@@ -529,13 +636,13 @@ UI.Number.prototype = Object.create( UI.Element.prototype );
 
 UI.Number.prototype.getValue = function () {
 
-	return parseFloat( this.dom.value );
+	return parseFloat( this.dom.children[ 0 ].textContent );
 
 };
 
 UI.Number.prototype.setValue = function ( value ) {
 
-	this.dom.value = value.toFixed( 2 );
+	this.dom.children[ 0 ].textContent = value.toFixed( 2 );
 
 	return this;
 
@@ -588,6 +695,7 @@ UI.HorizontalRule = function ( position ) {
 };
 
 UI.HorizontalRule.prototype = Object.create( UI.Element.prototype );
+
 
 // Button
 

@@ -76,15 +76,33 @@ var Viewport = function ( signals ) {
 
 	var projector = new THREE.Projector();
 
+	var distance = 0;
+
 	container.dom.addEventListener( 'mousedown', function ( event ) {
 
 		event.preventDefault();
+
+		distance = 0;
+
+	}, false );
+
+	container.dom.addEventListener( 'mousemove', function ( event ) {
+
+		distance += event.movementX || event.webkitMovementX || event.mozMovementX || 0;
+		distance += event.movementY || event.webkitMovementY || event.mozMovementY || 0;
+
+	}, false );
+
+	container.dom.addEventListener( 'mouseup', function ( event ) {
+
+		if ( Math.abs( distance ) > 1 ) return;
 
 		var vector = new THREE.Vector3(
 			( ( event.clientX - container.dom.offsetLeft ) / container.dom.offsetWidth ) * 2 - 1,
 			- ( ( event.clientY - container.dom.offsetTop ) / container.dom.offsetHeight ) * 2 + 1,
 			0.5
 		);
+
 		projector.unprojectVector( vector, camera );
 
 		var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
@@ -93,8 +111,6 @@ var Viewport = function ( signals ) {
 		if ( intersects.length ) {
 
 			signals.objectSelected.dispatch( intersects[ 0 ].object );
-
-			// controls.enabled = false;
 
 		} else {
 
